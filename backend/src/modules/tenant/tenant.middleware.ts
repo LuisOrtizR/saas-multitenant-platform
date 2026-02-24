@@ -1,8 +1,9 @@
-import { Response, NextFunction } from "express"
+import { Request, Response, NextFunction } from "express"
 import { AuthRequest } from "../auth/auth.middleware"
 
 export interface TenantRequest extends AuthRequest {
   organizationId?: string
+  prisma?: any
 }
 
 export function tenantValidationMiddleware(
@@ -10,15 +11,12 @@ export function tenantValidationMiddleware(
   res: Response,
   next: NextFunction
 ) {
-  const organizationId = req.user?.organizationId
-
-  if (!organizationId) {
+  if (!req.user?.organizationId) {
     return res.status(403).json({
       message: "Tenant context missing"
     })
   }
 
-  req.organizationId = organizationId
-
+  req.organizationId = req.user.organizationId
   next()
 }
