@@ -2,6 +2,7 @@ import express from "express"
 import { ENV } from "./config/env"
 import { generateToken } from "./modules/auth/auth.service"
 import { verifyToken, AuthRequest } from "./modules/auth/auth.middleware"
+import { tenantValidationMiddleware, TenantRequest } from "./modules/tenant/tenant.middleware"
 
 const app = express()
 app.use(express.json())
@@ -27,6 +28,18 @@ app.get("/protected", verifyToken, (req: AuthRequest, res) => {
     organizationId: req.user?.organizationId
   })
 })
+
+app.get(
+  "/tenant-protected",
+  verifyToken,
+  tenantValidationMiddleware,
+  (req: TenantRequest, res) => {
+    return res.json({
+      message: "Tenant validated successfully",
+      organizationId: req.organizationId
+    })
+  }
+)
 
 app.listen(ENV.PORT, () => {
   console.log(`Server running on port ${ENV.PORT}`)
