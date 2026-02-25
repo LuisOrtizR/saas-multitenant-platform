@@ -7,13 +7,14 @@ export function attachTenantPrisma(
   res: Response,
   next: NextFunction
 ) {
-  if (!req.organizationId) {
-    return res.status(403).json({
-      message: "Tenant context missing"
-    })
+  const organizationId = req.user?.organizationId
+
+  if (!organizationId) {
+    return res.status(403).json({ message: "Tenant context missing" })
   }
 
-  req.prisma = getTenantPrisma(req.organizationId)
+  req.organizationId = organizationId
+  req.prisma = getTenantPrisma(organizationId)
 
   next()
 }
