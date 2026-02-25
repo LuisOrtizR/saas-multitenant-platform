@@ -12,6 +12,7 @@ model Organization {
   name      String
   slug      String   @unique
   plan      Plan     @default(FREE)
+  suspended Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -22,8 +23,11 @@ model User {
   id             String   @id @default(uuid())
   email          String
   password       String
-  organization   Organization @relation(fields: [organizationId], references: [id])
-  organizationId String
+  role           Role     @default(USER)
+
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  organizationId String?
+
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
@@ -34,4 +38,10 @@ enum Plan {
   FREE
   PRO
   ENTERPRISE
+}
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  USER
 }
