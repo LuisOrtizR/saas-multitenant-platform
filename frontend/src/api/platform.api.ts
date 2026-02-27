@@ -8,13 +8,20 @@ export interface PlatformOrganization extends Organization {
     role: string
     organizationId: string
   }>
-  plan: string
+  subscription: {
+    status: string
+    plan: {
+      name: string
+      price: number
+      currency: string
+    }
+  } | null
   suspended: boolean
   createdAt: string
   updatedAt: string
 }
 
 export const platformApi = {
-  getOrganizations: () =>
-    http.get<PlatformOrganization[]>("/platform/organizations")
+  getOrganizations: () => http.get<PlatformOrganization[]>("/platform/organizations"),
+  suspendOrganization: (id: string) => http.patch(`/organizations/${id}/suspend`, {})
 }

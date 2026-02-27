@@ -6,11 +6,9 @@ import type { JwtPayload, Organization, LoginDTO, RegisterDTO } from "@/types/au
 
 function decodeToken(token: string): JwtPayload | null {
   try {
-    const parts = token.split(".")
-    const base64 = parts[1]
+    const base64 = token.split(".")[1]
     if (!base64) return null
-    const decoded = atob(base64.replace(/-/g, "+").replace(/_/g, "/"))
-    return JSON.parse(decoded) as JwtPayload
+    return JSON.parse(atob(base64.replace(/-/g, "+").replace(/_/g, "/"))) as JwtPayload
   } catch {
     return null
   }
@@ -21,29 +19,22 @@ const STORAGE_KEY = "auth"
 export const useAuthStore = defineStore("auth", () => {
   const router = useRouter()
 
-  // State
   const token = ref<string | null>(null)
   const user = ref<JwtPayload | null>(null)
-
-  // Multi-tenant selection flow
   const pendingLoginToken = ref<string | null>(null)
   const pendingOrganizations = ref<Organization[]>([])
   const requiresOrgSelection = ref(false)
 
-  // Computed
   const isAuthenticated = computed(() => !!token.value && !!user.value)
   const isSuperAdmin = computed(() => user.value?.role === "SUPER_ADMIN")
   const isAdmin = computed(() => user.value?.role === "ADMIN" || isSuperAdmin.value)
 
-  // Init from localStorage
   function init() {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return
     try {
       const stored = JSON.parse(raw)
-      if (stored.token) {
-        setToken(stored.token)
-      }
+      if (stored.token) setToken(stored.token)
     } catch {
       localStorage.removeItem(STORAGE_KEY)
     }
@@ -52,13 +43,10 @@ export const useAuthStore = defineStore("auth", () => {
   function setToken(newToken: string) {
     const payload = decodeToken(newToken)
     if (!payload) return
-
-    // Check expiry
     if (payload.exp && payload.exp * 1000 < Date.now()) {
       logout()
       return
     }
-
     token.value = newToken
     user.value = payload
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ token: newToken }))
@@ -82,33 +70,21 @@ export const useAuthStore = defineStore("auth", () => {
 
   async function selectOrganization(organizationId: string) {
     if (!pendingLoginToken.value) return
-
-    const response = await authApi.selectOrganization(
-      { organizationId },
-      pendingLoginToken.value
-    )
-
-    // Actualizar el header de autorización manualmente para esta llamada
+    const response = await authApi.selectOrganization({ organizationId }, pendingLoginToken.value)
     pendingLoginToken.value = null
     pendingOrganizations.value = []
     requiresOrgSelection.value = false
-
     setToken(response.token)
     await navigateAfterLogin()
   }
 
   async function register(data: RegisterDTO) {
-    const response = await authApi.register(data)
-    setToken(response.token)
-    await router.push("/dashboard")
+    await authApi.register(data)
+    await router.push("/login")
   }
 
   async function navigateAfterLogin() {
-    if (isSuperAdmin.value) {
-      await router.push("/platform")
-    } else {
-      await router.push("/dashboard")
-    }
+    await router.push(isSuperAdmin.value ? "/platform" : "/dashboard")
   }
 
   function logout() {
@@ -128,18 +104,8 @@ export const useAuthStore = defineStore("auth", () => {
   }
 
   return {
-    token,
-    user,
-    pendingOrganizations,
-    requiresOrgSelection,
-    isAuthenticated,
-    isSuperAdmin,
-    isAdmin,
-    init,
-    login,
-    selectOrganization,
-    register,
-    logout,
-    cancelOrgSelection
+    token, user, pendingOrganizations, requiresOrgSelection,
+    isAuthenticated, isSuperAdmin, isAdmin,
+    init, login, selectOrganization, register, logout, cancelOrgSelection
   }
 })

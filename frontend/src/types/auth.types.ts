@@ -40,8 +40,10 @@ export type LoginResponse =
     }
 
 export interface RegisterResponse {
-  token: string
   organization: Organization
+  plan: { id: string; name: string; price: number; currency: string }
+  subscription: { id: string; status: string }
+  user: { id: string; email: string; role: Role }
 }
 
 export interface SelectOrganizationResponse {
