@@ -11,12 +11,54 @@ model Organization {
   id        String   @id @default(uuid())
   name      String
   slug      String   @unique
-  plan      Plan     @default(FREE)
   suspended Boolean  @default(false)
+
+  users        User[]
+  subscription Subscription?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
 
-  users     User[]
+model Plan {
+  id        String  @id @default(uuid())
+  name      String  @unique
+  price     Int
+  currency  String  @default("USD")
+
+  features  Json
+  limits    Json
+
+  isActive  Boolean @default(true)
+
+  subscriptions Subscription[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Subscription {
+  id             String   @id @default(uuid())
+
+  organizationId String   @unique
+  organization   Organization @relation(fields: [organizationId], references: [id])
+
+  planId         String
+  plan           Plan @relation(fields: [planId], references: [id])
+
+  status         SubscriptionStatus @default(ACTIVE)
+
+  startDate      DateTime @default(now())
+  renewalDate    DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  TRIAL
+  CANCELED
 }
 
 model User {
@@ -32,12 +74,6 @@ model User {
   updatedAt      DateTime @updatedAt
 
   @@unique([email, organizationId])
-}
-
-enum Plan {
-  FREE
-  PRO
-  ENTERPRISE
 }
 
 enum Role {
