@@ -1,39 +1,21 @@
 import { Request, Response } from "express"
 import * as authService from "./auth.service"
-
-export async function register(req: Request, res: Response) {
-  try {
-    const result = await authService.register(req.body)
-    return res.status(201).json(result)
-  } catch (error: any) {
-    return res.status(error.status || 500).json({
-      message: error.message || "Internal server error"
-    })
-  }
-}
+import { ok, error } from "../../lib/response"
 
 export async function login(req: Request, res: Response) {
   try {
     const result = await authService.login(req.body)
-    return res.json(result)
-  } catch (error: any) {
-    return res.status(error.status || 500).json({
-      message: error.message || "Internal server error"
-    })
+    return ok(res, { message: "Login successful", ...result })
+  } catch (err: any) {
+    return error(res, err.status || 500, err.message || "Internal server error")
   }
 }
 
 export async function selectOrganization(req: Request, res: Response) {
   try {
-    const authHeader = req.headers.authorization
-    const result = await authService.selectOrganization(
-      req.body,
-      authHeader
-    )
-    return res.json(result)
-  } catch (error: any) {
-    return res.status(error.status || 500).json({
-      message: error.message || "Internal server error"
-    })
+    const result = await authService.selectOrganization(req.body, req.headers.authorization)
+    return ok(res, { message: "Organization selected successfully", ...result })
+  } catch (err: any) {
+    return error(res, err.status || 500, err.message || "Internal server error")
   }
 }

@@ -17,7 +17,7 @@ export const useUsersStore = defineStore("users", () => {
       users.value = response.users
       count.value = response.count
     } catch (err: unknown) {
-      error.value = (err as { message?: string }).message || "Failed to fetch users"
+      error.value = (err as { message?: string }).message ?? "Error al cargar usuarios"
     } finally {
       loading.value = false
     }

@@ -10,18 +10,31 @@
           <n-input v-model:value="form.name" placeholder="Mi Empresa S.A." :disabled="loading" />
         </n-form-item>
 
-        <n-form-item path="slug" label="Slug único">
-          <n-input v-model:value="form.slug" placeholder="mi-empresa" :disabled="loading">
+        <n-form-item path="slug" label="Identificador único (slug)">
+          <n-input v-model:value="form.slug" :disabled="loading">
             <template #prefix><n-text depth="3">@</n-text></template>
+            <template #suffix>
+              <n-tag size="tiny" type="info" round>auto</n-tag>
+            </template>
           </n-input>
+          <template #feedback>
+            <n-text depth="3" style="font-size: 11px;">
+              Se usa en tu URL: app.plataforma.com/<strong>{{ form.slug || "tu-empresa" }}</strong>
+            </n-text>
+          </template>
         </n-form-item>
 
         <n-divider title-placement="left">
           <n-text depth="3" style="font-size: 12px;">Cuenta de administrador</n-text>
         </n-divider>
 
-        <n-form-item path="email" label="Email">
+        <n-form-item path="email" label="Email del administrador">
           <n-input v-model:value="form.email" placeholder="admin@miempresa.com" :disabled="loading" />
+          <template #feedback>
+            <n-text depth="3" style="font-size: 11px;">
+              Esta persona tendrá acceso completo como administrador de la organización.
+            </n-text>
+          </template>
         </n-form-item>
 
         <n-form-item path="password" label="Contraseña">
@@ -52,7 +65,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue"
+import { ref, watch } from "vue"
 import { useMessage } from "naive-ui"
 import type { FormInst } from "naive-ui"
 import { useAuthStore } from "@/stores/auth.store"
@@ -63,6 +76,16 @@ const formRef = ref<FormInst | null>(null)
 const loading = ref(false)
 
 const form = ref({ name: "", slug: "", email: "", password: "" })
+
+watch(() => form.value.name, (name) => {
+  form.value.slug = name
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "")
+})
 
 const rules = {
   name: [{ required: true, message: "El nombre es requerido", trigger: "blur" }],
@@ -85,9 +108,9 @@ async function handleSubmit() {
   loading.value = true
   try {
     await auth.register(form.value)
-    message.success("¡Organización creada exitosamente!")
+    message.success("¡Organización creada! Ahora puedes iniciar sesión.")
   } catch (err: unknown) {
-    message.error((err as { message?: string }).message || "Error al crear la organización")
+    message.error((err as { message?: string }).message ?? "Error al crear la organización")
   } finally {
     loading.value = false
   }

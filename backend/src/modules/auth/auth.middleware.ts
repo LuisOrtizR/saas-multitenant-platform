@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express"
 import jwt from "jsonwebtoken"
 import { ENV } from "../../config/env"
-import { JwtPayload } from "./jwt.types"
+import { JwtPayload } from "./auth.types"
 
 export interface AuthRequest extends Request {
   user?: JwtPayload
