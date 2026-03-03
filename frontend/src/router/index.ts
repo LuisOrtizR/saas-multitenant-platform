@@ -25,7 +25,7 @@ const router = createRouter({
         {
           path: "dashboard",
           name: "dashboard",
-          component: () => import("@/pages/Dashboardpage.vue")
+          component: () => import("@/pages/DashboardPage.vue")
         },
         {
           path: "users",
@@ -38,6 +38,12 @@ const router = createRouter({
           name: "platform",
           component: () => import("@/pages/PlatformPage.vue"),
           meta: { requiresRole: ["SUPER_ADMIN"] }
+        },
+        {
+          path: "billing",
+          name: "billing",
+          component: () => import("@/pages/BillingPage.vue"),
+          meta: { requiresRole: ["ADMIN"] }
         }
       ]
     },
