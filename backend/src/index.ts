@@ -7,6 +7,7 @@ import billingRoutes from "./modules/billing/billing.routes"
 import usersRoutes from "./modules/users/users.routes"
 import platformRoutes from "./modules/platform/platform.routes"
 import { errorHandler } from "./middlewares/error.middleware"
+import { requestLogger } from "./middlewares/logger.middleware"    // ← NUEVO
 import { authenticate } from "./modules/auth/auth.middleware"
 import { trackApiRequest } from "./modules/billing/usage.middleware"
 
@@ -15,6 +16,7 @@ const app = express()
 app.use(cors({ origin: "http://localhost:5173", credentials: true }))
 app.use(express.json())
 
+app.use(requestLogger)                    
 
 
 app.use("/auth", authRoutes)
@@ -22,9 +24,9 @@ app.use("/organizations", organizationsRoutes)
 app.use("/billing", billingRoutes)
 app.use("/users", usersRoutes)
 app.use("/platform", platformRoutes)
-app.use(authenticate, trackApiRequest)   // ✅ ANTES de las rutas
+app.use(authenticate, trackApiRequest)  
 app.use(errorHandler)
 
 app.listen(ENV.PORT, () => {
-  console.log(`Server running on port ${ENV.PORT}`)
+  console.log(`✅ Server running on port ${ENV.PORT}`)
 })
