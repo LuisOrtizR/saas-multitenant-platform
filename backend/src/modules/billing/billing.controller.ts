@@ -20,3 +20,14 @@ export async function getSubscription(req: AuthRequest, res: Response) {
     return error(res, err.status || 500, err.message || "Internal server error")
   }
 }
+
+export async function upgradePlan(req: AuthRequest, res: Response) {
+  try {
+    const { planId } = req.body
+    if (!planId) return error(res, 400, "planId is required", "MISSING_PLAN_ID")
+    const result = await billingService.upgradePlan(req.user!.organizationId!, planId)
+    return ok(res, result)
+  } catch (err: any) {
+    return error(res, err.status || 500, err.message || "Internal server error", err.code)
+  }
+}

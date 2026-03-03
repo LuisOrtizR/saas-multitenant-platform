@@ -58,7 +58,7 @@ import { computed, h, ref, onMounted, onUnmounted } from "vue"
 import { useRoute, useRouter } from "vue-router"
 import { NIcon } from "naive-ui"
 import type { MenuOption } from "naive-ui"
-import { GridOutline, PeopleOutline, BusinessOutline } from "@vicons/ionicons5"
+import { GridOutline, PeopleOutline, BusinessOutline, CardOutline } from "@vicons/ionicons5"
 import { useAuthStore } from "@/stores/auth.store"
 import SidebarFooter from "./SidebarFooter.vue"
 
@@ -69,9 +69,7 @@ const router = useRouter()
 const activeKey = computed(() => route.name as string)
 const collapsed = ref(window.innerWidth < 900)
 
-function onResize() {
-  collapsed.value = window.innerWidth < 900
-}
+function onResize() { collapsed.value = window.innerWidth < 900 }
 onMounted(() => window.addEventListener("resize", onResize))
 onUnmounted(() => window.removeEventListener("resize", onResize))
 
@@ -83,6 +81,7 @@ const menuOptions = computed<MenuOption[]>(() => {
       icon: () => h(NIcon, null, { default: () => h(GridOutline) })
     }
   ]
+
   if (auth.isSuperAdmin) {
     base.push({
       label: "Organizaciones",
@@ -95,7 +94,13 @@ const menuOptions = computed<MenuOption[]>(() => {
       key: "users",
       icon: () => h(NIcon, null, { default: () => h(PeopleOutline) })
     })
+    base.push({
+      label: "Suscripción",
+      key: "billing",
+      icon: () => h(NIcon, null, { default: () => h(CardOutline) })
+    })
   }
+
   return base
 })
 
